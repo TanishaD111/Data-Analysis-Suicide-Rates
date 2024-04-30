@@ -1,0 +1,24 @@
+---
+title: "Suicide Rates Data Analysis Project"
+author: "Tanisha Damle"
+format: 
+  html:
+    embed-resources: true
+    code-tools: true
+    code-summary: "Code"
+---
+
+## Introduction of Dataset
+
+
+## Questions Explored With This Dataset
+
+Question 1: How do suicide rates vary across different age groups, genders, and generations, and how has this changed over time?
+
+Question 2: Are there any trends in suicide rates that can be attributed to changes in access to mental health resources, as reflected in GNI per capita, and how does this vary across countries with different levels of economic development? 
+
+Question 3: How does the employment population ratio and GDP per capita impact suicide rates, and is there a difference between genders and age groups?
+
+**Question 1**
+
+How do suicide rates vary across different age groups, genders, and generations, and how has this changed over time?
