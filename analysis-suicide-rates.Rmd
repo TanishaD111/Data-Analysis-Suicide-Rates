@@ -10,15 +10,83 @@ format:
 
 ## Introduction of Dataset
 
+The dataset we're working with covers suicide rates and factors possibly linked to suicide from 1990 to 2022. It helps us understand how suicide relates to different aspects of our lives. The data includes information on suicide numbers, population, and economic conditions across regions and countries. We trust its reliability because it comes from respected sources like the World Health Organization Suicide Prevention and the World Bank Open Data.
 
 ## Questions Explored With This Dataset
 
-Question 1: How do suicide rates vary across different age groups, genders, and generations, and how has this changed over time?
+Question 1: How do suicide rates vary across different age groups, genders, and countries, and how has this changed over time?
 
 Question 2: Are there any trends in suicide rates that can be attributed to changes in access to mental health resources, as reflected in GNI per capita, and how does this vary across countries with different levels of economic development? 
 
 Question 3: How does the employment population ratio and GDP per capita impact suicide rates, and is there a difference between genders and age groups?
 
+---
+
+## Visualizations and Analysis
+
+```{r, message=FALSE}
+# load libraries
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r, message=FALSE}
+# Read the dataset and drop missing values
+data <- read.csv("suicide_rates_1990-2022.csv")
+data <- na.omit(data)
+```
+
 **Question 1**
 
-How do suicide rates vary across different age groups, genders, and generations, and how has this changed over time?
+How do suicide rates vary across different age groups, genders, and countries, and how has this changed over time?
+
+Visualizations:
+
+Age Group vs Year: 
+```{r, message=FALSE}
+# Group data by age group and year, and calculate average suicide rates
+suicide_stats_by_age <- data %>%
+  group_by(Year, AgeGroup) %>%
+  summarise(AvgSuicideRate = mean(SuicideCount))
+
+# Plotting trends over time for different age groups
+ggplot(data = suicide_stats_by_age, aes(x = Year, y = AvgSuicideRate, color = AgeGroup)) +
+  geom_line() +
+  labs(title = "Trends in Suicide Rates Over Time by Age Group",
+       x = "Year",
+       y = "Average Suicide Rate",
+       color = "Age Group")
+```
+
+Gender vs Year: 
+```{r, message=FALSE}
+# Group data by gender and year, and calculate average suicide rates
+suicide_stats_by_gender <- data %>%
+  group_by(Year, Sex) %>%
+  summarize(AvgSuicideRate = mean(SuicideCount))
+
+# Plotting trends over time for different genders
+ggplot(data = suicide_stats_by_gender, aes(x = Year, y = AvgSuicideRate, color = Sex)) +
+  geom_line() +
+  labs(title = "Trends in Suicide Rates Over Time by Gender",
+       x = "Year",
+       y = "Average Suicide Rate",
+       color = "Gender")
+```
+
+Region vs Year: 
+```{r, message=FALSE}
+# Group data by region and year, and calculate average suicide rates
+suicide_stats_by_region <- data %>%
+  group_by(Year, RegionName) %>%
+  summarize(AvgSuicideRate = mean(SuicideCount))
+
+# Plotting trends over time for different regions
+ggplot(data = suicide_stats_by_region, aes(x = Year, y = AvgSuicideRate, color = RegionName)) +
+  geom_line() +
+  labs(title = "Trends in Suicide Rates Over Time by Region",
+       x = "Year",
+       y = "Average Suicide Rate",
+       color = "Region")
+```
+
