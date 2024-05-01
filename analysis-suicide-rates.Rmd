@@ -8,11 +8,11 @@ format:
     code-summary: "Code"
 ---
 
-## Introduction of Dataset
+# Introduction of Dataset
 
 The dataset we're working with covers suicide rates and factors possibly linked to suicide from 1990 to 2022. It helps us understand how suicide relates to different aspects of our lives. The data includes information on suicide numbers, population, and economic conditions across regions and countries. We trust its reliability because it comes from respected sources like the World Health Organization Suicide Prevention and the World Bank Open Data.
 
-## Questions Explored With This Dataset
+# Questions Explored With This Dataset
 
 Question 1: How do suicide rates vary across different age groups, genders, and countries, and how has this changed over time?
 
@@ -22,7 +22,11 @@ Question 3: How does the employment population ratio and GDP per capita impact s
 
 ---
 
-## Visualizations and Analysis
+# Visualizations and Analysis
+
+## Introductory Data Analysis Plan
+
+Before any visualization is created or any analysis is done for any question, the data needs to be cleaned up and a few libraries need to be loaded. We will need the "tidyverse" library in order to load the dataset and we will need "ggplot2" in order to visualize the data in a clean manner. Following this, we'll import the dataset into the R environment to enhance its readability and accessibility for subsequent tasks. Additionally, to streamline our visualization and analysis, we'll address any missing values within the dataset, ensuring a smooth and comprehensive analytical process. All of these steps are performed below: 
 
 ```{r, message=FALSE}
 # load libraries
@@ -36,11 +40,15 @@ data <- read.csv("suicide_rates_1990-2022.csv")
 data <- na.omit(data)
 ```
 
-**Question 1**
+## Question 1
 
 How do suicide rates vary across different age groups, genders, and countries, and how has this changed over time?
 
-Visualizations:
+**Specific Data Analysis Plan**
+
+For this question, 
+
+**Visualizations**
 
 Age Group vs Year: 
 ```{r, message=FALSE}
@@ -51,7 +59,7 @@ suicide_stats_by_age <- data %>%
 
 # Plotting trends over time for different age groups
 ggplot(data = suicide_stats_by_age, aes(x = Year, y = AvgSuicideRate, color = AgeGroup)) +
-  geom_line() +
+  geom_point() +
   labs(title = "Trends in Suicide Rates Over Time by Age Group",
        x = "Year",
        y = "Average Suicide Rate",
@@ -67,7 +75,7 @@ suicide_stats_by_gender <- data %>%
 
 # Plotting trends over time for different genders
 ggplot(data = suicide_stats_by_gender, aes(x = Year, y = AvgSuicideRate, color = Sex)) +
-  geom_line() +
+  geom_point() +
   labs(title = "Trends in Suicide Rates Over Time by Gender",
        x = "Year",
        y = "Average Suicide Rate",
@@ -83,10 +91,152 @@ suicide_stats_by_region <- data %>%
 
 # Plotting trends over time for different regions
 ggplot(data = suicide_stats_by_region, aes(x = Year, y = AvgSuicideRate, color = RegionName)) +
-  geom_line() +
+  geom_point() +
   labs(title = "Trends in Suicide Rates Over Time by Region",
        x = "Year",
        y = "Average Suicide Rate",
        color = "Region")
 ```
+
+**Inferential Analysis**
+
+```{r}
+
+# Perform linear regression for the age group "0-14 years"
+age_group_0_14 <- filter(suicide_stats_by_age, AgeGroup == "0-14 years")
+lm_model_0_14 <- lm(AvgSuicideRate ~ Year, data = age_group_0_14)
+residuals_0_14 <- residuals(lm_model_0_14)
+
+Q1_0_14 <- quantile(residuals_0_14, 0.25)
+Q3_0_14 <- quantile(residuals_0_14, 0.75)
+IQR_0_14 <- Q3_0_14 - Q1_0_14
+
+threshold_0_14 <- 1.5 * IQR_0_14
+outliers_0_14 <- abs(residuals_0_14) > threshold_0_14
+age_group_0_14 <- age_group_0_14[!outliers_0_14, ]
+
+lm_model_0_14_new <- lm(AvgSuicideRate ~ Year, data = age_group_0_14)
+coef(lm_model_0_14_new)
+
+
+# Perform linear regression for the age group "15-24 years"
+age_group_15_24 <- filter(suicide_stats_by_age, AgeGroup == "15-24 years")
+lm_model_15_24 <- lm(AvgSuicideRate ~ Year, data = age_group_15_24)
+residuals_15_24 <- residuals(lm_model_15_24)
+
+Q1_15_24 <- quantile(residuals_15_24, 0.25)
+Q3_15_24 <- quantile(residuals_15_24, 0.75)
+IQR_15_24 <- Q3_15_24 - Q1_15_24
+
+threshold_15_24 <- 1.5 * IQR_15_24
+outliers_15_24 <- abs(residuals_15_24) > threshold_15_24
+age_group_15_24 <- age_group_15_24[!outliers_15_24, ]
+
+lm_model_15_24_new <- lm(AvgSuicideRate ~ Year, data = age_group_15_24)
+coef(lm_model_15_24_new)
+
+# Perform linear regression for the age group "25-34 years"
+age_group_25_34 <- filter(suicide_stats_by_age, AgeGroup == "25-34 years")
+lm_model_25_34 <- lm(AvgSuicideRate ~ Year, data = age_group_25_34)
+residuals_25_34 <- residuals(lm_model_25_34)
+
+Q1_25_34 <- quantile(residuals_25_34, 0.25)
+Q3_25_34 <- quantile(residuals_25_34, 0.75)
+IQR_25_34 <- Q3_25_34 - Q1_25_34
+
+threshold_25_34 <- 1.5 * IQR_25_34
+outliers_25_34 <- abs(residuals_25_34) > threshold_25_34
+age_group_25_34 <- age_group_25_34[!outliers_25_34, ]
+
+lm_model_25_34_new <- lm(AvgSuicideRate ~ Year, data = age_group_25_34)
+coef(lm_model_25_34_new)
+
+# Perform linear regression for the age group "35-54 years"
+age_group_35_54 <- filter(suicide_stats_by_age, AgeGroup == "35-54 years")
+lm_model_35_54 <- lm(AvgSuicideRate ~ Year, data = age_group_35_54)
+residuals_35_54 <- residuals(lm_model_35_54)
+
+Q1_35_54 <- quantile(residuals_35_54, 0.25)
+Q3_35_54 <- quantile(residuals_35_54, 0.75)
+IQR_35_54 <- Q3_35_54 - Q1_35_54
+
+threshold_35_54 <- 1.5 * IQR_35_54
+outliers_35_54 <- abs(residuals_35_54) > threshold_35_54
+age_group_35_54 <- age_group_35_54[!outliers_35_54, ]
+
+lm_model_35_54_new <- lm(AvgSuicideRate ~ Year, data = age_group_35_54)
+coef(lm_model_35_54_new)
+
+# Perform linear regression for the age group "55-74 years"
+age_group_55_74 <- filter(suicide_stats_by_age, AgeGroup == "55-74 years")
+lm_model_55_74 <- lm(AvgSuicideRate ~ Year, data = age_group_55_74)
+residuals_55_74 <- residuals(lm_model_55_74)
+
+Q1_55_74 <- quantile(residuals_55_74, 0.25)
+Q3_55_74 <- quantile(residuals_55_74, 0.75)
+IQR_55_74 <- Q3_55_74 - Q1_55_74
+
+threshold_55_74 <- 1.5 * IQR_55_74
+outliers_55_74 <- abs(residuals_55_74) > threshold_55_74
+age_group_55_74 <- age_group_55_74[!outliers_55_74, ]
+
+lm_model_55_74_new <- lm(AvgSuicideRate ~ Year, data = age_group_55_74)
+coef(lm_model_55_74_new)
+
+# Perform linear regression for the age group "75+ years"
+age_group_75_plus <- filter(suicide_stats_by_age, AgeGroup == "75+ years")
+lm_model_75_plus <- lm(AvgSuicideRate ~ Year, data = age_group_75_plus)
+residuals_75_plus <- residuals(lm_model_75_plus)
+
+Q1_75_plus <- quantile(residuals_75_plus, 0.25)
+Q3_75_plus <- quantile(residuals_75_plus, 0.75)
+IQR_75_plus <- Q3_75_plus - Q1_75_plus
+
+threshold_75_plus <- 1.5 * IQR_75_plus
+outliers_75_plus <- abs(residuals_75_plus) > threshold_75_plus
+age_group_75_plus <- age_group_75_plus[!outliers_75_plus, ]
+
+lm_model_75_plus_new <- lm(AvgSuicideRate ~ Year, data = age_group_75_plus)
+coef(lm_model_75_plus_new)
+
+```
+
+```{r, message=FALSE}
+# Create a data frame for coefficients of each age group
+coefficients_df <- data.frame(
+  AgeGroup = c("0-14 years", "15-24 years", "25-34 years", "35-54 years", "55-74 years", "75+ years"),
+  Intercept = c(coef(lm_model_0_14_new)[1], coef(lm_model_15_24_new)[1], coef(lm_model_25_34_new)[1],
+                coef(lm_model_35_54_new)[1], coef(lm_model_55_74_new)[1], coef(lm_model_75_plus_new)[1]),
+  Year = c(coef(lm_model_0_14_new)[2], coef(lm_model_15_24_new)[2], coef(lm_model_25_34_new)[2],
+           coef(lm_model_35_54_new)[2], coef(lm_model_55_74_new)[2], coef(lm_model_75_plus_new)[2]),
+  Order = c(1, 2, 3, 4, 5, 6) # Add an order column
+)
+
+# Sort coefficients_df by color
+coefficients_df <- coefficients_df[order(coefficients_df$Order), ]
+
+# Plotting regression lines for each age group
+ggplot() +
+  geom_smooth(data = age_group_0_14, aes(x = Year, y = AvgSuicideRate, color = "0-14 years"), 
+              method = "lm", se = FALSE) +
+  geom_smooth(data = age_group_15_24, aes(x = Year, y = AvgSuicideRate, color = "15-24 years"), 
+              method = "lm", se = FALSE) +
+  geom_smooth(data = age_group_25_34, aes(x = Year, y = AvgSuicideRate, color = "25-34 years"), 
+              method = "lm", se = FALSE) +
+  geom_smooth(data = age_group_35_54, aes(x = Year, y = AvgSuicideRate, color = "35-54 years"), 
+              method = "lm", se = FALSE) +
+  geom_smooth(data = age_group_55_74, aes(x = Year, y = AvgSuicideRate, color = "55-74 years"), 
+              method = "lm", se = FALSE) +
+  geom_smooth(data = age_group_75_plus, aes(x = Year, y = AvgSuicideRate, color = "75+ years"), 
+              method = "lm", se = FALSE) +
+  labs(title = "Regression Lines for Suicide Rates by Age Group",
+       x = "Year",
+       y = "Average Suicide Rate",
+       color = "Age Group") +
+  scale_color_viridis_d() +
+  guides(color = guide_legend(title = "Age Group"))
+
+```
+
+
 
