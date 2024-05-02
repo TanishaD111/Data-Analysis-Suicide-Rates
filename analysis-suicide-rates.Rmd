@@ -46,7 +46,7 @@ How do suicide rates vary across different age groups, genders, and countries, a
 
 **Specific Data Analysis Plan**
 
-For this question, 
+For this question, we will first perform basic visualizations to display the data and view potential correlations. Data will be grouped by different groups within each sub-topic in the question, such as by age group, gender, and country. We will analyze correlations we see with a linear regression model done for each group and each sub-group by using the "lm" function. In order to do this, any outliers will be taken out as the linear regression model would be incorrect if the outliers were left in. The outliers will be calculated based on the sub-group average suicide rate's interquartile range. 
 
 **Visualizations**
 
@@ -97,9 +97,21 @@ ggplot(data = suicide_stats_by_region, aes(x = Year, y = AvgSuicideRate, color =
        y = "Average Suicide Rate",
        color = "Region")
 ```
+**Outline Assumptions**
+
+1. Linearity: In this analysis, we are're examining how suicide rates (dependent variable) change over time (independent variable) within each age group. The assumption of linearity suggests that the relationship between time (year) and suicide rates within each age group can be adequately represented by a straight line. With the visualizations, we can see that the observed patterns in this data align with this assumption because trends can be represented by a straight line.
+
+2. Independence: This assumption implies that the errors (residuals) in predicting suicide rates for one year within an age group should not be related to errors from predicting suicide rates for another year within the same age group. Because each age group is separated by age and there is no overlap within individuals within one age group either, each observation's error is independent of others.
+
+3. Normality: This assumption pertains to the distribution of errors around the regression line. Even though we are primarily interested in the relationship between time (year) and suicide rates, we can assume that the residuals from our regression models follow a normal distribution within each age group.
+
+4. Equal Variance: We are investigating whether the variance in suicide rates remains constant over time within each age group. This assumption suggests that the spread of the residuals around the regression line should be consistent across different years within the same age group. We can assume that the variance of residuals is stable or exhibits patterns of increasing or decreasing variability over time.
+
+Because these four assumptions can be made with this dataset, we can proceed and perform an inferential analysis with a linear regression. 
 
 **Inferential Analysis**
 
+Linear Model for Age Group vs Suicide Rate: 
 ```{r}
 
 # Perform linear regression for the age group "0-14 years"
@@ -201,6 +213,7 @@ coef(lm_model_75_plus_new)
 
 ```
 
+Plotting Regression Line for Age Group vs Suicide Rate: 
 ```{r, message=FALSE}
 # Create a data frame for coefficients of each age group
 coefficients_df <- data.frame(
@@ -238,5 +251,195 @@ ggplot() +
 
 ```
 
+Linear Model for Gender vs Suicide Rate:
+
+```{r}
+# Perform linear regression for the gender group "Female"
+female_data <- filter(suicide_stats_by_gender, Sex == "Female")
+lm_female <- lm(AvgSuicideRate ~ Year, data = female_data)
+residuals_female <- residuals(lm_female)
+
+Q1_female <- quantile(residuals_female, 0.25)
+Q3_female <- quantile(residuals_female, 0.75)
+IQR_female <- Q3_female - Q1_female
+
+threshold_female <- 1.5 * IQR_female
+outliers_female <- abs(residuals_female) > threshold_female
+female_data <- female_data[!outliers_female, ]
+
+lm_female_new <- lm(AvgSuicideRate ~ Year, data = female_data)
+coef(lm_female_new)
+
+# Perform linear regression for the gender group "Male"
+male_data <- filter(suicide_stats_by_gender, Sex == "Male")
+lm_male <- lm(AvgSuicideRate ~ Year, data = male_data)
+residuals_male <- residuals(lm_male)
+
+Q1_male <- quantile(residuals_male, 0.25)
+Q3_male <- quantile(residuals_male, 0.75)
+IQR_male <- Q3_male - Q1_male
+
+threshold_male <- 1.5 * IQR_male
+outliers_male <- abs(residuals_male) > threshold_male
+male_data <- male_data[!outliers_male, ]
+
+lm_male_new <- lm(AvgSuicideRate ~ Year, data = male_data)
+coef(lm_male_new)
+
+```
+
+
+Plotting Regression Line for Gender vs Suicide Rate: 
+
+```{r, message=FALSE}
+# Create a data frame for coefficients of each gender group
+coefficients_gender_df <- data.frame(
+  Sex = c("Female", "Male"),
+  Intercept = c(coef(lm_female_new)[1], coef(lm_male_new)[1]),
+  Year = c(coef(lm_female_new)[2], coef(lm_male_new)[2]),
+  Order = c(1, 2) # Add an order column
+)
+
+# Sort coefficients_gender_df by color
+coefficients_gender_df <- coefficients_gender_df[order(coefficients_gender_df$Order), ]
+
+# Plotting regression lines for each gender group
+ggplot() +
+  geom_smooth(data = female_data, aes(x = Year, y = AvgSuicideRate, color = "Female"), 
+              method = "lm", se = FALSE) +
+  geom_smooth(data = male_data, aes(x = Year, y = AvgSuicideRate, color = "Male"), 
+              method = "lm", se = FALSE) +
+  labs(title = "Regression Lines for Suicide Rates by Gender",
+       x = "Year",
+       y = "Average Suicide Rate",
+       color = "Gender") +
+  scale_color_viridis_d() +
+  guides(color = guide_legend(title = "Gender"))
+
+```
+
+Linear Model for Country vs Suicide Rate:
+
+```{r}
+# Filter data for each country group and perform linear regression
+# Africa
+africa_data <- filter(suicide_stats_by_region, RegionName == "Africa")
+lm_africa <- lm(AvgSuicideRate ~ Year, data = africa_data)
+residuals_africa <- residuals(lm_africa)
+Q1_africa <- quantile(residuals_africa, 0.25)
+Q3_africa <- quantile(residuals_africa, 0.75)
+IQR_africa <- Q3_africa - Q1_africa
+threshold_africa <- 1.5 * IQR_africa
+outliers_africa <- abs(residuals_africa) > threshold_africa
+africa_data <- africa_data[!outliers_africa, ]
+lm_africa_new <- lm(AvgSuicideRate ~ Year, data = africa_data)
+coef(lm_africa_new)
+
+# Asia
+asia_data <- filter(suicide_stats_by_region, RegionName == "Asia")
+lm_asia <- lm(AvgSuicideRate ~ Year, data = asia_data)
+residuals_asia <- residuals(lm_asia)
+Q1_asia <- quantile(residuals_asia, 0.25)
+Q3_asia <- quantile(residuals_asia, 0.75)
+IQR_asia <- Q3_asia - Q1_asia
+threshold_asia <- 1.5 * IQR_asia
+outliers_asia <- abs(residuals_asia) > threshold_asia
+asia_data <- asia_data[!outliers_asia, ]
+lm_asia_new <- lm(AvgSuicideRate ~ Year, data = asia_data)
+coef(lm_asia_new)
+
+# Central and South America
+central_south_america_data <- filter(suicide_stats_by_region, RegionName == "Central and South America")
+lm_central_south_america <- lm(AvgSuicideRate ~ Year, data = central_south_america_data)
+residuals_central_south_america <- residuals(lm_central_south_america)
+Q1_central_south_america <- quantile(residuals_central_south_america, 0.25)
+Q3_central_south_america <- quantile(residuals_central_south_america, 0.75)
+IQR_central_south_america <- Q3_central_south_america - Q1_central_south_america
+threshold_central_south_america <- 1.5 * IQR_central_south_america
+outliers_central_south_america <- abs(residuals_central_south_america) > threshold_central_south_america
+central_south_america_data <- central_south_america_data[!outliers_central_south_america, ]
+lm_central_south_america_new <- lm(AvgSuicideRate ~ Year, data = central_south_america_data)
+coef(lm_central_south_america_new)
+
+# Europe
+europe_data <- filter(suicide_stats_by_region, RegionName == "Europe")
+lm_europe <- lm(AvgSuicideRate ~ Year, data = europe_data)
+residuals_europe <- residuals(lm_europe)
+Q1_europe <- quantile(residuals_europe, 0.25)
+Q3_europe <- quantile(residuals_europe, 0.75)
+IQR_europe <- Q3_europe - Q1_europe
+threshold_europe <- 1.5 * IQR_europe
+outliers_europe <- abs(residuals_europe) > threshold_europe
+europe_data <- europe_data[!outliers_europe, ]
+lm_europe_new <- lm(AvgSuicideRate ~ Year, data = europe_data)
+coef(lm_europe_new)
+
+# Oceania
+oceania_data <- filter(suicide_stats_by_region, RegionName == "Oceania")
+lm_oceania <- lm(AvgSuicideRate ~ Year, data = oceania_data)
+residuals_oceania <- residuals(lm_oceania)
+Q1_oceania <- quantile(residuals_oceania, 0.25)
+Q3_oceania <- quantile(residuals_oceania, 0.75)
+IQR_oceania <- Q3_oceania - Q1_oceania
+threshold_oceania <- 1.5 * IQR_oceania
+outliers_oceania <- abs(residuals_oceania) > threshold_oceania
+oceania_data <- oceania_data[!outliers_oceania, ]
+lm_oceania_new <- lm(AvgSuicideRate ~ Year, data = oceania_data)
+coef(lm_oceania_new)
+
+# North America and the Caribbean
+north_america_caribbean_data <- filter(suicide_stats_by_region, RegionName == "North America and the Caribbean")
+lm_north_america_caribbean <- lm(AvgSuicideRate ~ Year, data = north_america_caribbean_data)
+residuals_north_america_caribbean <- residuals(lm_north_america_caribbean)
+Q1_north_america_caribbean <- quantile(residuals_north_america_caribbean, 0.25)
+Q3_north_america_caribbean <- quantile(residuals_north_america_caribbean, 0.75)
+IQR_north_america_caribbean <- Q3_north_america_caribbean - Q1_north_america_caribbean
+threshold_north_america_caribbean <- 1.5 * IQR_north_america_caribbean
+outliers_north_america_caribbean <- abs(residuals_north_america_caribbean) > threshold_north_america_caribbean
+north_america_caribbean_data <- north_america_caribbean_data[!outliers_north_america_caribbean, ]
+lm_north_america_caribbean_new <- lm(AvgSuicideRate ~ Year, data = north_america_caribbean_data)
+coef(lm_north_america_caribbean_new)
+
+```
+
+Plotting Regression Line for Country vs Suicide Rate: 
+
+```{r, message=FALSE}
+
+# Create coefficient dataframes for each country group
+coefficients_country_df <- data.frame(
+  Country = c("Africa", "Asia", "Central and South America", "Europe", "Oceania", "North America and the Caribbean"),
+  Intercept = c(coef(lm_africa_new)[1], coef(lm_asia_new)[1], coef(lm_central_south_america_new)[1],
+                coef(lm_europe_new)[1], coef(lm_oceania_new)[1], coef(lm_north_america_caribbean_new)[1]),
+  Year = c(coef(lm_africa_new)[2], coef(lm_asia_new)[2], coef(lm_central_south_america_new)[2],
+           coef(lm_europe_new)[2], coef(lm_oceania_new)[2], coef(lm_north_america_caribbean_new)[2]),
+  Order = c(1, 2, 3, 4, 5, 6) # Add an order column
+)
+
+# Sort coefficients_country_df by order
+coefficients_country_df <- coefficients_country_df[order(coefficients_country_df$Order), ]
+
+# Plotting regression lines for each country group
+ggplot() +
+  geom_smooth(data = africa_data, aes(x = Year, y = AvgSuicideRate, color = "Africa"), 
+              method = "lm", se = FALSE) +
+  geom_smooth(data = asia_data, aes(x = Year, y = AvgSuicideRate, color = "Asia"), 
+              method = "lm", se = FALSE) +
+  geom_smooth(data = central_south_america_data, aes(x = Year, y = AvgSuicideRate, color = "Central and South America"), 
+              method = "lm", se = FALSE) +
+  geom_smooth(data = europe_data, aes(x = Year, y = AvgSuicideRate, color = "Europe"), 
+              method = "lm", se = FALSE) +
+  geom_smooth(data = oceania_data, aes(x = Year, y = AvgSuicideRate, color = "Oceania"), 
+              method = "lm", se = FALSE) +
+  geom_smooth(data = north_america_caribbean_data, aes(x = Year, y = AvgSuicideRate, color = "North America and the Caribbean"), 
+              method = "lm", se = FALSE) +
+  labs(title = "Regression Lines for Suicide Rates by Country",
+       x = "Year",
+       y = "Average Suicide Rate",
+       color = "Country") +
+  scale_color_viridis_d() +
+  guides(color = guide_legend(title = "Country"))
+
+```
 
 
